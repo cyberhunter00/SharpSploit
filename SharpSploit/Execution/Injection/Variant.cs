@@ -26,7 +26,7 @@ namespace SharpSploit.Execution.Injection
         /// <summary>
         /// Internal method for setting the supported payload types. Used in constructors.
         /// </summary>
-        abstract internal void defineSupportedPayloadTypes();
+        abstract internal void DefineSupportedPayloadTypes();
 
         /// <summary>
         /// Top-level method for injecting payloads using this technique.
@@ -45,11 +45,15 @@ namespace SharpSploit.Execution.Injection
     /// <summary>
     /// RemoteThread variant that simply creates a thread in a remote process at a specified address using NtCreateThreadEx.
     /// </summary>
-    public class RemoteThreadCreateVariant : VariantType
+    public class RemoteThreadCreateVariant : VariantType, IRemoteThreadInjectionStrategy
     {
         //Option: Whether to start the thread in a suspended state.
         //Default value: False.
-        private RemoteThreadCreateOptions options = new RemoteThreadCreateOptions(false);
+        public RemoteThreadOptions options
+        {
+            get { return options; }
+            set { options = value; }
+        }
 
         //Handle of the new thread. Only valid after the thread has been created.
         private IntPtr handle = IntPtr.Zero;
@@ -59,7 +63,9 @@ namespace SharpSploit.Execution.Injection
         /// </summary>
         public RemoteThreadCreateVariant()
         {
-            defineSupportedPayloadTypes();
+            options = new RemoteThreadOptions();
+
+            DefineSupportedPayloadTypes();
 
         }
 
@@ -67,26 +73,17 @@ namespace SharpSploit.Execution.Injection
         /// Constructor with options passed in.
         /// </summary>
         /// <param name="options">The options to set.</param>
-        public RemoteThreadCreateVariant(RemoteThreadCreateOptions optionsIn)
+        public RemoteThreadCreateVariant(RemoteThreadOptions optionsIn)
         {
-            defineSupportedPayloadTypes();
+            DefineSupportedPayloadTypes();
 
-            setOptions(optionsIn);
-        }
-
-        /// <summary>
-        /// Set the options for the variant. 
-        /// </summary>
-        /// <param name="optionsIn">New set of options.</param>
-        public void setOptions(RemoteThreadCreateOptions optionsIn)
-        {
             options = optionsIn;
         }
 
         /// <summary>
         /// Internal method for setting the supported payload types. Used in constructors.
         /// </summary>
-        internal override void defineSupportedPayloadTypes()
+        internal override void DefineSupportedPayloadTypes()
         {
             //Defines the set of supported payload types.
             supportedPayloads = new Type[] {
@@ -128,27 +125,9 @@ namespace SharpSploit.Execution.Injection
         /// Get the handle of the created thread. Will return IntPtr.Zero if the payload has not been injected yet.
         /// </summary>
         /// <returns></returns>
-        public IntPtr getHandle()
+        public IntPtr GetHandle()
         {
             return handle;
-        }
-    }
-
-    /// <summary>
-    /// Struct containing a set of options for the RemoteThreadCreateVariant class.
-    /// </summary>
-    public struct RemoteThreadCreateOptions
-    {
-        //Whether or not to create the thread in a suspended state.
-        public bool suspended;
-
-        /// <summary>
-        /// Constructor for options struct.
-        /// </summary>
-        /// <param name="suspendOption">Whether or not to create the thread in a suspended state.</param>
-        public RemoteThreadCreateOptions(bool suspendOption)
-        {
-            suspended = suspendOption;
         }
     }
 }
